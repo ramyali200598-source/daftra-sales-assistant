@@ -8,7 +8,7 @@ const rates={annual:{user:315,branch:1860,warehouse:540,employee:99},monthly:{us
 function planFeatures(plan){const f=(n)=>n===Infinity?'غير محدود':n;return[
  `${f(plan.invoices)} فاتورة/عرض سعر شهريًا`,
  `${f(plan.customers)} عميل`,
- `${plan.users} مستخدم متضمن`,
+ plan.users===1?'مستخدم واحد فقط (الأدمن) — أي مستخدم إضافي بمقابل':`الأدمن + ${plan.users-1} مستخدم إضافي متضمن (إجمالي ${plan.users}) — أي مستخدم أكتر بمقابل`,
  `${plan.warehouses} مستودع متضمن`,
  `${plan.employees} حساب موظف (HR) متضمن`,
  `${plan.storageGb} GB مساحة تخزين`,
