@@ -1,10 +1,23 @@
 /* Pricing Engine */
 const plans=[
- {name:'الأساسية',annual:1140,monthly:120,users:1,warehouses:1,invoices:100,employees:1,manufacturing:false},
- {name:'المتقدمة',annual:1860,monthly:220,users:2,warehouses:3,invoices:500,employees:2,manufacturing:false},
- {name:'الشاملة',annual:2700,monthly:320,users:2,warehouses:5,invoices:Infinity,employees:3,manufacturing:true}
+ {name:'الأساسية',annual:1140,monthly:120,users:1,warehouses:1,invoices:100,employees:1,manufacturing:false,customers:100,storageGb:5,aiCoins:60,cashAccounts:2,einvoicePhase:'المرحلة الأولى'},
+ {name:'المتقدمة',annual:1860,monthly:220,users:2,warehouses:3,invoices:500,employees:2,manufacturing:false,customers:300,storageGb:10,aiCoins:200,cashAccounts:5,einvoicePhase:'المرحلة الأولى والثانية'},
+ {name:'الشاملة',annual:2700,monthly:320,users:2,warehouses:5,invoices:Infinity,employees:3,manufacturing:true,customers:Infinity,storageGb:20,aiCoins:500,cashAccounts:Infinity,einvoicePhase:'المرحلة الأولى والثانية'}
 ];
 const rates={annual:{user:315,branch:1860,warehouse:540,employee:99},monthly:{user:35,branch:195,warehouse:58.5,employee:11.25}};
+function planFeatures(plan){const f=(n)=>n===Infinity?'غير محدود':n;return[
+ `${f(plan.invoices)} فاتورة/عرض سعر شهريًا`,
+ `${f(plan.customers)} عميل`,
+ `${plan.users} مستخدم متضمن`,
+ `${plan.warehouses} مستودع متضمن`,
+ `${plan.employees} حساب موظف (HR) متضمن`,
+ `${plan.storageGb} GB مساحة تخزين`,
+ `${plan.aiCoins} عملة ذكاء اصطناعي شهريًا`,
+ `${f(plan.cashAccounts)} حساب خزينة/بنك`,
+ `فاتورة إلكترونية: ${plan.einvoicePhase}`,
+ plan.manufacturing?'إدارة التصنيع وقائمة المواد (BOM) متاحة':'بدون إدارة تصنيع (متاحة في الشاملة فقط)',
+ 'نقاط بيع سحابية غير محدودة، ودعم فني 24/7'
+];}
 let billingPeriod='annual';
 const byId=id=>document.getElementById(id);
 const number=id=>Math.max(0,Number(byId(id).value)||0);
@@ -37,7 +50,7 @@ function restoreDraft(){try{const saved=JSON.parse(localStorage.getItem('daftraS
 function quoteHistory(){return JSON.parse(localStorage.getItem('daftraQuoteHistory')||'[]');}
 
 /* UI Rendering */
-function renderPlans(){const {allQuotes,selected,suitable}=recommendation();byId('plans').innerHTML=allQuotes.map(quote=>{const selectedPlan=quote===selected,qualified=!quote.limitations.length;const tradeoff=qualified&&suitable.length>1?`<small>${selectedPlan?'ميزة: أقل تكلفة مؤهلة.':'ميزة: مرونة أعلى للنمو مقابل تكلفة أكبر.'}</small>`:'';return `<article class="plan ${selectedPlan?'best':''}" style="opacity:${qualified?1:.72}"><h3>${quote.plan.name} ${selectedPlan?'✓':''}</h3><div class="price">${currency(displayPrice(quote.preTax).shown)} <small>ر.س</small></div>${priceDetails(quote.preTax)}<div class="decision">${qualified?'<span class="ok">✓ مؤهلة: تغطي الاحتياج الحالي</span>':`<b class="bad">● غير مؤهلة</b><br>${quote.limitations.map(reason=>`<span class="bad">● ${reason}</span>`).join('<br>')}`}${selectedPlan?`<hr>${recommendationExplanation(selected,allQuotes)}`:''}</div>${tradeoff}</article>`;}).join('');}
+function renderPlans(){const {allQuotes,selected,suitable}=recommendation();byId('plans').innerHTML=allQuotes.map(quote=>{const selectedPlan=quote===selected,qualified=!quote.limitations.length;const tradeoff=qualified&&suitable.length>1?`<small>${selectedPlan?'ميزة: أقل تكلفة مؤهلة.':'ميزة: مرونة أعلى للنمو مقابل تكلفة أكبر.'}</small>`:'';return `<article class="plan ${selectedPlan?'best':''}" style="opacity:${qualified?1:.72}"><h3>${quote.plan.name} ${selectedPlan?'✓':''}</h3><div class="price">${currency(displayPrice(quote.preTax).shown)} <small>ر.س</small></div>${priceDetails(quote.preTax)}<ul class="features">${planFeatures(quote.plan).map(item=>`<li>${item}</li>`).join('')}</ul><div class="decision">${qualified?'<span class="ok">✓ مؤهلة: تغطي الاحتياج الحالي</span>':`<b class="bad">● غير مؤهلة</b><br>${quote.limitations.map(reason=>`<span class="bad">● ${reason}</span>`).join('<br>')}`}${selectedPlan?`<hr>${recommendationExplanation(selected,allQuotes)}`:''}</div>${tradeoff}</article>`;}).join('');}
 function renderDashboard(){const {selected,confidence}=recommendation(),price=displayPrice(selected.preTax),monthly=price.shown/(billingPeriod==='annual'?12:1);byId('dashboardPlan').textContent='باقة '+selected.plan.name;byId('dashboardDeal').textContent=currency(price.shown)+' ر.س';byId('dashboardMrr').textContent=currency(monthly)+' ر.س';byId('dashboardScore').textContent=confidence+'%';byId('dashboardQualification').textContent=byId('need').value==='High'?'جاهزة للنقاش':'تحتاج استكشافاً إضافياً';}
 function renderAssistant(){const {selected,confidence}=recommendation(),req=customerRequirements(),price=displayPrice(selected.preTax);byId('recommendationTitle').textContent='باقة '+selected.plan.name;byId('matchScore').textContent=confidence+'%';byId('scoreRing').style.setProperty('--score',confidence+'%');byId('consultantAdvice').innerHTML=`<span class="ok">ثقة التوصية: ${confidence}%</span><br>${recommendationExplanation(selected,quotes())}`;const items=[['العميل',byId('customerName').value||'غير محدد'],['النشاط',byId('activity').value||'غير محدد'],['الدولة',byId('country').value],['المستخدمون',req.users],['الفروع',req.branches],['المستودعات',req.warehouses],['الفواتير',req.invoices],['الموظفون',req.employees],['التصنيع',req.manufacturing?'نعم':'لا'],['الباقة',selected.plan.name],['السعر',currency(price.shown)+' ر.س']];byId('customerSummary').innerHTML=items.map(([label,value])=>`<div><span>${label}</span><b>${value}</b></div>`).join('');renderRoi(price.shown);}
 function renderHistory(){byId('quoteHistory').innerHTML=quoteHistory().map((quote,index)=>`<div><b>${quote.customer||'عميل بدون اسم'}</b><br>${quote.date} · ${quote.plan}<br><button class="btn" onclick="loadQuote(${index})">تعديل</button><button class="btn" onclick="deleteQuote(${index})">حذف</button></div>`).join('')||'لا توجد عروض محفوظة';}
