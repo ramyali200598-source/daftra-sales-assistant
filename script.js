@@ -5,6 +5,60 @@ const plans=[
  {name:'الشاملة',annual:2700,monthly:320,users:2,warehouses:5,invoices:Infinity,employees:3,manufacturing:true,customers:Infinity,storageGb:20,aiCoins:500,cashAccounts:Infinity,einvoicePhase:'المرحلة الأولى والثانية'}
 ];
 const rates={annual:{user:315,branch:1860,warehouse:540,employee:99},monthly:{user:35,branch:195,warehouse:58.5,employee:11.25}};
+const competitorData={
+ Excel:{pitch:'الانتقال من العشوائية والخطأ البشري إلى الأتمتة الكاملة، الأمان، والامتثال الضريبي الإلزامي.',points:[
+  'مراقبة ومنع التلاعب: صلاحيات دقيقة لكل موظف، مستحيل كاشير أو موظف مخزن يعدل أو يحذف حاجة بدون علمك، بعكس الإكسيل المفتوح لأي تعديل.',
+  'تقارير لحظية: قوائم الأرباح والخسائر، والميزانية العمومية، وحركة المخازن تطلع بضغطة زر فوراً، بدل ما تضيع أيام في تجميع الجداول يدوياً.',
+  'الأمان السحابي: بيانات العميل محمية ومشفرة على سحابة آمنة، مفيش خوف من ضياع ملف الإكسيل أو ضرب الهارد ديسك.'
+ ]},
+ Odoo:{pitch:'نظام ERP متكامل وقوي جداً، لكن بتكلفة واضحة وثابتة وبدون مصاريف خفية أو فواتير صادمة.',points:[
+  'التكلفة الإجمالية للملكية (TCO): في أودو، العميل بيدفع تمن الرخص، وفوقها مصاريف ضخمة للاستضافة، ومصاريف فلكية لشركات التطوير (Implementation Partners). في دفترة السعر شامل كل حاجة (الاستضافة، الدعم، التحديثات).',
+  'تعريب حقيقي ونقي: واجهة دفترة عربية بنسبة 100% ومبنية للثقافة الخليجية، مش مجرد "ترجمة آلية" مشوهة لبعض الكلمات زي أودو.',
+  'جاهز فوراً: في أودو، العميل بيدخل في دوامة تعديل الكود والتطوير وممكن يقعد 6 شهور عشان يبدأ يبيع. في دفترة السيستم جاهز للعمل من اليوم الأول.'
+ ]},
+ Zoho:{pitch:'نظام سحابي محلي، يفهم بيئة الأعمال واللوائح السعودية بدقة متناهية مقارنة بالأنظمة العالمية العامة.',points:[
+  'التوافق السلس مع ZATCA: نظام الفوترة والربط في دفترة مدمج ومصمم خصيصاً للسوق السعودي، بينما زوهو يحتاج إعدادات وربط إضافي معقد في بعض الأحيان.',
+  'دعم فني محلي وعربي: الدعم الفني في دفترة متواجد لخدمة العميل مباشرة باللغة العربية وفي نفس توقيت المملكة، بعكس دعم زوهو اللي أغلبه بالإنجليزية ومبني على نظام التذاكر البطيء.',
+  'بساطة الواجهة: دفترة يركز على تيسير الخطوات؛ إدخال فاتورة أو عمل قيد محاسبي أسرع بكتير وأقل تعقيداً في الخطوات من زوهو.'
+ ]},
+ SAP:{pitch:'قوة ومرونة الأنظمة العالمية الضخمة، لكن بكسر بسيط جداً من التكلفة ووقت تشغيل قياسي.',points:[
+  'لا حاجة لفريق IT: ساب يحتاج خوادم ضخمة، وفريق مهندسين IT متخصصين لمتابعته وصيانته (وهذا مكلف جداً). دفترة نظام سحابي بالكامل تفتحه من المتصفح والشركة هي اللي بتدير السيرفرات والأمان.',
+  'مرونة وسرعة التعديل: أي تعديل في صلاحيات الموظفين أو إضافة مستودع جديد في دفترة بياخد ثواني، في ساب بيحتاج طلب تغيير برمجيات ومبالغ إضافية.',
+  'مناسب للنمو السريع: يمنح الشركات المتوسطة والناشئة نفس القوة الإدارية للشركات الكبرى بدون ما يضغط على ميزانيتها.'
+ ]},
+ Qoyod:{pitch:'دفترة هو نظام ERP تشغيلي متكامل، يتجاوز مجرد القيود المحاسبية البسيطة ليدير كافة مفاصل الشركة.',points:[
+  'نظام تصنيع حقيقي (BOM): قيود برنامج محاسبي بسيط؛ لا يحتوي على نظام تصنيع وتحويل المواد الخام إلى منتجات تامّة ومراقبة خطوط الإنتاج مثل دفترة.',
+  'إدارة موارد بشرية (HR) متقدمة: دفترة يحتوي على نظام HR احترافي كامل (مسيرات رواتب متوافقة مع الأنظمة السعودية، تتبع حضور وانصراف، إجازات وعقود)، بينما قيود يحتاج برامج وسيطة.',
+  'دورة مخازن وفروع أقوى: إدارة متطورة جداً للجرد، والتحويل بين الفروع، ونقاط البيع السريعة (POS) للمطاعم والتجزئة مع ربطها تلقائياً بالمخزن الرئيسي.'
+ ]},
+ Wafeq:{pitch:'دفترة يمنحك السيطرة الكاملة على الدورة المستندية والتجارية لشركتك، وليس فقط استخراج الفواتير الضريبية.',points:[
+  'دورة مستندية وتجارية كاملة: وافق يركز بشكل أساسي على الفواتير والضرائب. دفترة يدير دورتك التجارية بالكامل من أول (عروض الأسعار، أوامر البيع، سندات تسليم البضائع، سندات الصرف والقبض، أوامر المشتريات).',
+  'نظام إدارة علاقات العملاء (CRM): دفترة يحتوي على موديول كامل للـ CRM لإنشاء خطوط سير الصفقات (Sales Pipelines) ومتابعة الـ Leads وفريق المبيعات، وهو ما يفتقده وافق تماماً.',
+  'تخصيص القوالب والفواتير: مرونة لانهائية في تصميم وتخصيص شكل الفواتير المطبوعة، وإضافة الشروط والأحكام لتناسب هوية الشركة التجارية بالملي.'
+ ]}
+};
+competitorData.Oracle=competitorData.SAP;
+competitorData.SMACC={context:'عادةً العميل اللي بيقارن بسماك بيكون من الشركات القديمة في السوق أو المحاسب بتاعه متعود عليه.',pitch:'الانتقال من الأنظمة التقليدية المعقدة إلى جيل جديد من الـ ERP السحابي المرن، السهل، والحديث.',points:[
+ 'سهولة الاستخدام والتدريب: سماك واجهته قديمة وخطواتها كتير وصعبة جداً في تدريب الموظفين الجداد (الكاشير أو موظف المخزن). دفترة واجهته عصرية وأي موظف بيتعلم عليها في نص ساعة.',
+ 'نظام CRM حقيقي: سماك نظام محاسبة ومخازن وبس. دفترة بيديك موديول كامل لإدارة علاقات العملاء (CRM) ومتابعة فريق المبيعات والصفقات عشان يزود مبيعات الشركة.',
+ 'التقارير الرسومية والداشبورد: دفترة بيديك لوحة تحكم ذكية برسم بياني واضح لصاحب العمل يشوف منها أداء شركته فوراً من موبايله، بعكس تقارير سماك الجافة والتقليدية.'
+]};
+competitorData.AlAmeen={context:'ده البعبع بتاع المحاسبين القدام، بيكون شغال على سيرفر محلي في الشركة.',pitch:'التحرر من قيود السيرفرات المحلية والأجهزة المكلفة إلى أمان وحرية النظام السحابي الكامل.',points:[
+ 'توفير تكلفة البنية التحتية: الأمين بيحتاج تشتري رخص غالية جداً كاش مقدماً، وبيحتاج جهاز سيرفر في الشركة، وشبكة داخلية، ومهندس IT للصيانة. دفترة اشتراك شهري أو سنوي بسيط جداً وتفتحه من أي لاب توب أو موبايل.',
+ 'العمل من أي مكان: لو صاحب الشغل مسافر أو في البيت، يقدر يتابع المخازن والمبيعات لحظة بلحظة. في الأمين لازم يكون جوه الشركة أو يربط VPN معقد وبطيء.',
+ 'تحديثات ZATCA التلقائية: لما هيئة الزكاة بتعدل أي شرط في الفوترة الإلكترونية، التحديث بينزل في دفترة فوراً ومجاناً لكل العملاء. في الأمين لازم تدفع تمن التحديث ومهندس يجيلك الشركة يثبته يدوي على السيرفر.'
+]};
+competitorData.Foodics={context:'ده هتقابله لو العميل (مطعم، كافيه، أو مخبز) وبيقارن بنقاط البيع.',pitch:'إدارة الشركة بالكامل بنظام ERP ومحاسبة ومخازن حقيقي، وليس مجرد شاشة كاشير لطلب الأكل.',points:[
+ 'قوة النظام الخلفي (Back Office ERP): فودكس وحش في شاشة الكاشير والمطاعم، لكن موديول المحاسبة والمخازن والموردين بتاعه بسيط جداً، وغالباً العميل بيضطر يشتري برنامج محاسبة تاني ويربطه مع فودكس بفلوس زيادة. دفترة بيديك الـPOS والـERP والمحاسبة والـHR في سيستم واحد مدمج.',
+ 'التكلفة وأجهزة نقاط البيع: فودكس بيجبر العميل على أجهزة معينة (iPad) واشتراكاته غالية مع كل فرع وجهاز إضافي. دفترة بيشتغل على أي شاشة، أي تابلت، أو حتى موبايل أندرويد، وده بيوفر على العميل آلاف الريالات في التأسيس.',
+ 'إدارة شؤون الموظفين (HR): دفترة بيدير مسيرات رواتب موظفين المطعم، شيفتاتهم، وحضورهم وانصرافهم، وده مش موجود في فودكس.'
+]};
+competitorData.QuickBooks={context:'دول هتقابلهم مع الشركات التقنية الناشئة (Startups) أو الشركات اللي مدرائها أجانب.',pitch:'نظام ERP معتمد ومتوافق 100% مع السوق السعودي واللوائح المحلية بدون الحاجة لتطبيقات ربط خارجية (Bridges).',points:[
+ 'الاعتماد المباشر للمرحلة الثانية (ZATCA): كويك بوكس وزيرو برامج عالمية، وعشان تربطها مع هيئة الزكاة والجمارك في السعودية للمرحلة الثانية، العميل لازم يشتري برنامج وسيط (Middleware) غالي جداً ومشاكله التقنية كتير. دفترة معتمد وبيربط مباشرة بضغطة زر.',
+ 'الدعم الفني واللغة: دفترة دعمه الفني عربي ومتواجد في نفس توقيت المملكة لحل أي مشكلة فوراً. البرامج العالمية دعمها بالإنجليزي وبنظام التذاكر وبياخد أيام.',
+ 'الدورة المستندية العربية: تصميم الفواتير، وعروض الأسعار، وسندات القبض والصرف في دفترة مبني على طريقة التجارة العربية والسعودية بالملي، بعكس البرامج الغربية.'
+]};
+competitorData.Xero=competitorData.QuickBooks;
 function planFeatures(plan){const f=(n)=>n===Infinity?'غير محدود':n;return[
  `${f(plan.invoices)} فاتورة/عرض سعر شهريًا`,
  `${f(plan.customers)} عميل`,
@@ -60,5 +114,5 @@ function render(){renderPlans();renderDashboard();renderAssistant();const messag
 function copyText(value){navigator.clipboard?.writeText(value);alert('تم النسخ');}
 function saveQuote(){const {selected}=recommendation(),price=displayPrice(selected.preTax),history=quoteHistory();history.unshift({customer:byId('customerName').value,date:new Date().toLocaleDateString('ar-SA'),plan:selected.plan.name,total:price.shown,form:JSON.parse(localStorage.getItem('daftraSalesAssistant')).data});localStorage.setItem('daftraQuoteHistory',JSON.stringify(history.slice(0,50)));renderHistory();}
 window.loadQuote=index=>{const quote=quoteHistory()[index];Object.entries(quote.form).forEach(([id,value])=>{const element=byId(id);if(element)element.type==='checkbox'?element.checked=value:element.value=value;});render();};window.deleteQuote=index=>{const history=quoteHistory();history.splice(index,1);localStorage.setItem('daftraQuoteHistory',JSON.stringify(history));renderHistory();};
-document.querySelectorAll('input,select,textarea').forEach(element=>element.addEventListener('input',render));document.querySelectorAll('.period').forEach(button=>button.addEventListener('click',()=>{billingPeriod=button.dataset.period;render();}));document.querySelectorAll('[data-copy]').forEach(button=>button.addEventListener('click',()=>copyText(byId(button.dataset.copy).value||byId(button.dataset.copy).innerText)));byId('copyPricing').addEventListener('click',()=>copyText(whatsAppText()));byId('themeButton').addEventListener('click',()=>{document.body.classList.toggle('dark');saveDraft();});byId('newCustomerButton').addEventListener('click',()=>{if(confirm('مسح بيانات العميل الحالي؟')){document.querySelectorAll('input,textarea').forEach(element=>element.type==='checkbox'?element.checked=false:element.value='');render();}});byId('proposalButton').addEventListener('click',()=>{if(!byId('customerName').value.trim())return alert('يرجى إدخال اسم العميل أولاً');byId('proposalSheet').innerHTML=buildProposal();byId('proposalModal').classList.add('show');});byId('saveQuoteButton').addEventListener('click',saveQuote);byId('competitor').addEventListener('change',event=>{const tips={Excel:'دقة أعلى وتقارير لحظية بدون عمل يدوي.',Odoo:'دعم عربي وتجربة محلية أبسط.',SAP:'إطلاق أسرع وتكلفة ملكية أقل.',Oracle:'مرونة أسرع وتكلفة أبسط.',Qoyod:'تشغيل أوسع للمبيعات والمخزون وHR.',Wafeq:'يتجاوز المحاسبة إلى التشغيل الكامل.'};byId('competitorTip').textContent=tips[event.target.value]||'اربط الاحتياج بأثر تشغيلي ملموس.';});
+document.querySelectorAll('input,select,textarea').forEach(element=>element.addEventListener('input',render));document.querySelectorAll('.period').forEach(button=>button.addEventListener('click',()=>{billingPeriod=button.dataset.period;render();}));document.querySelectorAll('[data-copy]').forEach(button=>button.addEventListener('click',()=>copyText(byId(button.dataset.copy).value||byId(button.dataset.copy).innerText)));byId('copyPricing').addEventListener('click',()=>copyText(whatsAppText()));byId('themeButton').addEventListener('click',()=>{document.body.classList.toggle('dark');saveDraft();});byId('newCustomerButton').addEventListener('click',()=>{if(confirm('مسح بيانات العميل الحالي؟')){document.querySelectorAll('input,textarea').forEach(element=>element.type==='checkbox'?element.checked=false:element.value='');render();}});byId('proposalButton').addEventListener('click',()=>{if(!byId('customerName').value.trim())return alert('يرجى إدخال اسم العميل أولاً');byId('proposalSheet').innerHTML=buildProposal();byId('proposalModal').classList.add('show');});byId('saveQuoteButton').addEventListener('click',saveQuote);byId('competitor').addEventListener('change',event=>{const data=competitorData[event.target.value];byId('competitorTip').innerHTML=data?`${data.context?`<i>${data.context}</i><br>`:''}<b>${data.pitch}</b><ul class="features">${data.points.map(point=>`<li>${point}</li>`).join('')}</ul>`:'اختر المنافس لعرض نقاط البيع.';});
 restoreDraft();render();renderHistory();
