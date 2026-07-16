@@ -1,6 +1,6 @@
 /* Pricing Engine */
 const plans=[
- {name:'الأساسية',annual:1140,monthly:120,users:1,warehouses:1,invoices:100,employees:1,manufacturing:false,customers:100,storageGb:5,aiCoins:60,cashAccounts:2,einvoicePhase:'المرحلة الأولى'},
+ {name:'الأساسية',annual:1140,monthly:120,users:1,warehouses:1,invoices:100,employees:0,manufacturing:false,customers:100,storageGb:5,aiCoins:60,cashAccounts:2,einvoicePhase:'المرحلة الأولى'},
  {name:'المتقدمة',annual:1860,monthly:220,users:2,warehouses:3,invoices:500,employees:2,manufacturing:false,customers:300,storageGb:10,aiCoins:200,cashAccounts:5,einvoicePhase:'المرحلة الأولى والثانية'},
  {name:'الشاملة',annual:2700,monthly:320,users:2,warehouses:5,invoices:Infinity,employees:3,manufacturing:true,customers:Infinity,storageGb:20,aiCoins:500,cashAccounts:Infinity,einvoicePhase:'المرحلة الأولى والثانية'}
 ];
@@ -64,7 +64,7 @@ function planFeatures(plan){const f=(n)=>n===Infinity?'غير محدود':arDigi
  `${f(plan.customers)} عميل`,
  plan.users===1?'مستخدم واحد فقط (الأدمن) — أي مستخدم إضافي بمقابل':`الأدمن + ${arDigits(plan.users-1)} مستخدم إضافي متضمن (إجمالي ${arDigits(plan.users)}) — أي مستخدم أكتر بمقابل`,
  `${arDigits(plan.warehouses)} مستودع متضمن`,
- `${arDigits(plan.employees)} حساب موظف (HR) متضمن`,
+ plan.employees===0?'بدون حساب موظفين (HR) — أي موظف يُضاف بمقابل':`${arDigits(plan.employees)} حساب موظف (HR) متضمن`,
  `${arDigits(plan.storageGb)} GB مساحة تخزين`,
  `${arDigits(plan.aiCoins)} عملة ذكاء اصطناعي شهريًا`,
  `${f(plan.cashAccounts)} حساب خزينة/بنك`,
@@ -78,7 +78,7 @@ const number=id=>Math.max(0,Number(byId(id).value)||0);
 const arDigits=value=>String(value).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
 const currency=value=>arDigits(Number(value||0).toLocaleString('ar-SA',{maximumFractionDigits:2}));
 
-function customerRequirements(){return{users:Math.max(0,number('users')),branches:Math.max(1,number('branches')),warehouses:Math.max(1,number('warehouses')),invoices:number('invoices'),employees:Math.max(1,number('employees')),manufacturing:byId('manufacturing').checked};}
+function customerRequirements(){return{users:Math.max(0,number('users')),branches:Math.max(1,number('branches')),warehouses:Math.max(1,number('warehouses')),invoices:number('invoices'),employees:Math.max(0,number('employees')),manufacturing:byId('manufacturing').checked};}
 function limitations(plan,index,requirements){const reasons=[];if(requirements.manufacturing&&!plan.manufacturing)reasons.push('التصنيع / BOM مطلوب وهو غير متاح');if(index===0&&requirements.branches>1)reasons.push(`عدد الفروع (${arDigits(requirements.branches)}) يتجاوز حد فرع واحد`);if(requirements.invoices>plan.invoices&&plan.invoices!==Infinity)reasons.push(`الفواتير (${arDigits(requirements.invoices)}) تتجاوز الحد (${arDigits(plan.invoices)})`);return reasons;}
 function planQuote(plan,index,requirements){const rate=rates[billingPeriod],base=plan[billingPeriod],totalUsers=requirements.users+1,extraUsers=Math.max(0,totalUsers-plan.users),extraBranches=Math.max(0,requirements.branches-1),extraWarehouses=Math.max(0,requirements.warehouses-plan.warehouses),extraEmployees=Math.max(0,requirements.employees-plan.employees);const line=(qty,unit,label)=>`${arDigits(qty)} ${label} إضافي × ${currency(unit)} = ${currency(qty*unit)} ر.س`;const addonItems=[extraUsers>0&&{label:line(extraUsers,rate.user,'مستخدم'),cost:extraUsers*rate.user},extraBranches>0&&{label:line(extraBranches,rate.branch,'فرع'),cost:extraBranches*rate.branch},extraWarehouses>0&&{label:line(extraWarehouses,rate.warehouse,'مستودع'),cost:extraWarehouses*rate.warehouse},extraEmployees>0&&{label:line(extraEmployees,rate.employee,'موظف'),cost:extraEmployees*rate.employee}].filter(Boolean);const addons=addonItems.reduce((s,i)=>s+i.cost,0);return{plan,index,base,addons,addonItems,preTax:base+addons,limitations:limitations(plan,index,requirements)};}
 function quotes(){const requirements=customerRequirements();return plans.map((plan,index)=>planQuote(plan,index,requirements));}
