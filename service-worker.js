@@ -1,9 +1,10 @@
-const CACHE_NAME = 'daftra-sales-assistant-v1';
+const CACHE_NAME = 'daftra-sales-assistant-v2';
 const ASSETS = [
   './',
   './index.html',
   './style.css',
   './script.js',
+  './kb-data.js',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
