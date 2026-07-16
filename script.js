@@ -103,7 +103,8 @@ function renderRoi(monthlyCost){const hours=number('wastedHours')*number('roiEmp
 
 /* Knowledge Base */
 function searchKb(term){term=(term||'').trim();if(!term)return[];const words=term.split(/\s+/).filter(Boolean);return kbData.filter(item=>{const haystack=`${item.tags} ${item.title} ${item.content}`;return words.every(w=>haystack.includes(w));});}
-function renderKb(){const term=byId('kbSearch').value,container=byId('kbResults');if(!term.trim()){container.innerHTML='<p class="kb-hint">ابدأ الكتابة للبحث في الموسوعة (مثال: زكاة، نقاط البيع، تقسيط، تصنيع، الشراكة، HR).</p>';return;}const results=searchKb(term);container.innerHTML=results.length?results.map(item=>`<article class="kb-item"><h3>${item.title}</h3><p>${item.content}</p></article>`).join(''):'<p class="kb-hint">لا توجد نتائج مطابقة. جرب كلمة أخرى.</p>';}
+function kbCard(item){const badges=item.tags.split(/\s+/).filter(Boolean).map(tag=>`<span class="kb-tag">#${tag}</span>`).join('');return `<article class="kb-item"><div class="kb-tags">${badges}</div><h3>${item.title}</h3><p>${item.content}</p></article>`;}
+function renderKb(){const term=byId('kbSearch').value,container=byId('kbResults'),results=term.trim()?searchKb(term):kbData;container.innerHTML=results.length?results.map(kbCard).join(''):'<p class="kb-hint">لا توجد نتائج مطابقة. جرب كلمة أخرى.</p>';}
 
 /* Local Storage */
 function saveDraft(){const data={};document.querySelectorAll('input:not(#kbSearch),select,textarea').forEach(element=>data[element.id]=element.type==='checkbox'?element.checked:element.value);localStorage.setItem('daftraSalesAssistant',JSON.stringify({data,billingPeriod,dark:document.body.classList.contains('dark')}));}
