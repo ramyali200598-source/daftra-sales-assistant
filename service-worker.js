@@ -1,4 +1,4 @@
-const CACHE_NAME = 'daftra-sales-assistant-v10';
+const CACHE_NAME = 'daftra-sales-assistant-v11';
 const ASSETS = [
   './',
   './index.html',
