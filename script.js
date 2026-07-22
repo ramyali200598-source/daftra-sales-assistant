@@ -206,7 +206,8 @@ restoreDraft();render();renderHistory();renderKb();
     select.dispatchEvent(new Event('input', {bubbles:true}));
   }
 
-  searchInput.addEventListener('focus', () => renderList(searchInput.value));
+  searchInput.addEventListener('focus', () => { renderList(''); searchInput.select(); });
+  searchInput.addEventListener('click', () => { if (dropdown.hidden) renderList(''); });
   searchInput.addEventListener('input', () => {
     renderList(searchInput.value);
     if (!searchInput.value.trim()) selectValue('');
