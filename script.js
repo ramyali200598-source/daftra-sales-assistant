@@ -150,7 +150,7 @@ function kbCard(item){const badges=item.tags.split(/\s+/).filter(Boolean).map(ta
 function renderKb(){const term=byId('kbSearch').value,container=byId('kbResults'),results=term.trim()?searchKb(term):kbData;container.innerHTML=results.length?results.map(kbCard).join(''):'<p class="kb-hint">لا توجد نتائج مطابقة. جرب كلمة أخرى.</p>';}
 
 /* Local Storage */
-function saveDraft(){const data={};document.querySelectorAll('input:not(#kbSearch),select,textarea').forEach(element=>data[element.id]=element.type==='checkbox'?element.checked:element.value);localStorage.setItem('daftraSalesAssistant',JSON.stringify({data,billingPeriod,dark:document.body.classList.contains('dark')}));}
+function saveDraft(){const data={};document.querySelectorAll('input:not(#kbSearch):not(#activitySearch),select,textarea').forEach(element=>data[element.id]=element.type==='checkbox'?element.checked:element.value);localStorage.setItem('daftraSalesAssistant',JSON.stringify({data,billingPeriod,dark:document.body.classList.contains('dark')}));}
 function restoreDraft(){try{const saved=JSON.parse(localStorage.getItem('daftraSalesAssistant'));if(!saved)return;Object.entries(saved.data||{}).forEach(([id,value])=>{const element=byId(id);if(element)element.type==='checkbox'?element.checked=value:element.value=value;});billingPeriod=saved.billingPeriod||billingPeriod;document.body.classList.toggle('dark',saved.dark);}catch{}}
 function quoteHistory(){return JSON.parse(localStorage.getItem('daftraQuoteHistory')||'[]');}
 
@@ -165,7 +165,71 @@ function render(){renderPlans();renderDashboard();renderAssistant();renderActivi
 function copyText(value){navigator.clipboard?.writeText(value);alert('تم النسخ');}
 function saveQuote(){const {selected}=recommendation(),price=displayPrice(selected),history=quoteHistory();history.unshift({customer:byId('customerName').value,date:new Date().toLocaleDateString('ar-SA'),plan:selected.plan.name,total:price.shown,form:JSON.parse(localStorage.getItem('daftraSalesAssistant')).data});localStorage.setItem('daftraQuoteHistory',JSON.stringify(history.slice(0,50)));renderHistory();}
 window.loadQuote=index=>{const quote=quoteHistory()[index];Object.entries(quote.form).forEach(([id,value])=>{const element=byId(id);if(element)element.type==='checkbox'?element.checked=value:element.value=value;});render();};window.deleteQuote=index=>{const history=quoteHistory();history.splice(index,1);localStorage.setItem('daftraQuoteHistory',JSON.stringify(history));renderHistory();};
-document.querySelectorAll('input:not(#kbSearch),select,textarea').forEach(element=>element.addEventListener('input',render));document.querySelectorAll('.period').forEach(button=>button.addEventListener('click',()=>{billingPeriod=button.dataset.period;render();}));document.querySelectorAll('[data-copy]').forEach(button=>button.addEventListener('click',()=>copyText(byId(button.dataset.copy).value||byId(button.dataset.copy).innerText)));byId('copyPricing').addEventListener('click',()=>copyText(whatsAppText()));byId('themeButton').addEventListener('click',()=>{document.body.classList.toggle('dark');saveDraft();});byId('newCustomerButton').addEventListener('click',()=>{if(confirm('مسح بيانات العميل الحالي؟')){document.querySelectorAll('input,textarea').forEach(element=>element.type==='checkbox'?element.checked=false:element.value='');render();}});byId('proposalButton').addEventListener('click',()=>{if(!byId('customerName').value.trim())return alert('يرجى إدخال اسم العميل أولاً');byId('proposalSheet').innerHTML=buildProposal();byId('proposalModal').classList.add('show');});byId('saveQuoteButton').addEventListener('click',saveQuote);byId('competitor').addEventListener('change',event=>{const data=competitorData[event.target.value];byId('competitorTip').innerHTML=data?`${data.context?`<i>${data.context}</i><br>`:''}<b>${data.pitch}</b><ul class="features">${data.points.map(point=>`<li>${point}</li>`).join('')}</ul>`:'اختر المنافس لعرض نقاط البيع.';});
+document.querySelectorAll('input:not(#kbSearch):not(#activitySearch),select,textarea').forEach(element=>element.addEventListener('input',render));document.querySelectorAll('.period').forEach(button=>button.addEventListener('click',()=>{billingPeriod=button.dataset.period;render();}));document.querySelectorAll('[data-copy]').forEach(button=>button.addEventListener('click',()=>copyText(byId(button.dataset.copy).value||byId(button.dataset.copy).innerText)));byId('copyPricing').addEventListener('click',()=>copyText(whatsAppText()));byId('themeButton').addEventListener('click',()=>{document.body.classList.toggle('dark');saveDraft();});byId('newCustomerButton').addEventListener('click',()=>{if(confirm('مسح بيانات العميل الحالي؟')){document.querySelectorAll('input,textarea').forEach(element=>element.type==='checkbox'?element.checked=false:element.value='');render();}});byId('proposalButton').addEventListener('click',()=>{if(!byId('customerName').value.trim())return alert('يرجى إدخال اسم العميل أولاً');byId('proposalSheet').innerHTML=buildProposal();byId('proposalModal').classList.add('show');});byId('saveQuoteButton').addEventListener('click',saveQuote);byId('competitor').addEventListener('change',event=>{const data=competitorData[event.target.value];byId('competitorTip').innerHTML=data?`${data.context?`<i>${data.context}</i><br>`:''}<b>${data.pitch}</b><ul class="features">${data.points.map(point=>`<li>${point}</li>`).join('')}</ul>`:'اختر المنافس لعرض نقاط البيع.';});
 byId('kbSearch').addEventListener('input',renderKb);
 byId('knowledgeButton').addEventListener('click',()=>{const opening=byId('kbSection').hidden;byId('kbSection').hidden=!opening;byId('dashboardSection').hidden=opening;byId('layoutSection').hidden=opening;byId('knowledgeButton').textContent=opening?'💰 حاسبة الأسعار':'📚 الموسوعة';if(opening){renderKb();byId('kbSearch').focus();}});
 restoreDraft();render();renderHistory();renderKb();
+
+/* Searchable activity combobox */
+(function(){
+  const searchInput = document.getElementById('activitySearch');
+  const dropdown = document.getElementById('activityDropdown');
+  const select = document.getElementById('activity');
+  if (!searchInput || !dropdown || !select) return;
+  const options = Array.from(select.options).filter(o => o.value !== '');
+
+  function highlight(text, term){
+    if (!term) return text;
+    const idx = text.indexOf(term);
+    if (idx === -1) return text;
+    return text.slice(0, idx) + '<mark>' + text.slice(idx, idx + term.length) + '</mark>' + text.slice(idx + term.length);
+  }
+
+  function renderList(term){
+    const t = (term || '').trim();
+    const filtered = t ? options.filter(o => o.textContent.includes(t)) : options;
+    if (!filtered.length){
+      dropdown.innerHTML = '<div class="combo-empty">لا توجد نتائج مطابقة</div>';
+      dropdown.hidden = false;
+      return;
+    }
+    dropdown.innerHTML = filtered.map(o =>
+      `<div class="combo-item" data-value="${o.textContent.replace(/"/g,'&quot;')}">${highlight(o.textContent, t)}</div>`
+    ).join('');
+    dropdown.hidden = false;
+  }
+
+  function selectValue(value){
+    select.value = value;
+    searchInput.value = value;
+    dropdown.hidden = true;
+    select.dispatchEvent(new Event('input', {bubbles:true}));
+  }
+
+  searchInput.addEventListener('focus', () => renderList(searchInput.value));
+  searchInput.addEventListener('input', () => {
+    renderList(searchInput.value);
+    if (!searchInput.value.trim()) selectValue('');
+  });
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape'){ dropdown.hidden = true; searchInput.blur(); }
+  });
+  dropdown.addEventListener('mousedown', (e) => {
+    const item = e.target.closest('.combo-item');
+    if (!item) return;
+    e.preventDefault();
+    selectValue(item.dataset.value);
+  });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.combo')) dropdown.hidden = true;
+  });
+
+  // Keep the visible search box in sync with the underlying select
+  // (covers restoreDraft(), loadQuote(), and the "new customer" reset button)
+  searchInput.value = select.value || '';
+  const syncFromSelect = () => { searchInput.value = select.value || ''; };
+  document.getElementById('newCustomerButton')?.addEventListener('click', syncFromSelect);
+  window.loadQuote = (function(original){
+    return function(index){ original(index); syncFromSelect(); };
+  })(window.loadQuote);
+})();
